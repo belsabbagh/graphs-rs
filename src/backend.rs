@@ -1,17 +1,19 @@
-pub trait EdgeValComparable: PartialEq +Default +Clone {
-  fn compare(&self, other: &Self) -> bool;
+pub trait EdgeValComparable: PartialEq + Default + Clone {
+    fn compare(&self, other: &Self) -> bool;
 
-  fn is_default(&self) -> bool {
-      self == &Self::default()
-  }
+    fn is_default(&self) -> bool {
+        self == &Self::default()
+    }
 }
-pub trait Backend<NodeVal, EdgeVal: EdgeValComparable> {
+pub trait Backend {
+    type EdgeVal: EdgeValComparable;
+
     fn new() -> Self;
     fn add_node(&mut self);
-    fn add_edge(&mut self, from: usize, to: usize, weight: EdgeVal);
-    fn get_outs(&self, from: usize) -> Vec<(usize, EdgeVal)>;
-    fn get_ins(&self, to: usize) -> Vec<(usize, EdgeVal)>;
-    fn get_edges(&self, node: usize) -> Vec<(usize, EdgeVal)> {
+    fn add_edge(&mut self, from: usize, to: usize, weight: Self::EdgeVal);
+    fn get_outs(&self, from: usize) -> Vec<(usize, Self::EdgeVal)>;
+    fn get_ins(&self, to: usize) -> Vec<(usize, Self::EdgeVal)>;
+    fn get_edges(&self, node: usize) -> Vec<(usize, Self::EdgeVal)> {
         let mut edges = Vec::new();
 
         edges.extend(self.get_outs(node));
@@ -26,7 +28,8 @@ pub struct AdjacencyMatrixBackend<T: EdgeValComparable> {
     data: Vec<Vec<T>>,
 }
 
-impl<T: EdgeValComparable> Backend<T, T> for AdjacencyMatrixBackend<T> {
+impl<T: EdgeValComparable> Backend for AdjacencyMatrixBackend<T> {
+    type EdgeVal = T;
     fn new() -> Self {
         Self { data: Vec::new() }
     }
@@ -59,7 +62,6 @@ impl<T: EdgeValComparable> Backend<T, T> for AdjacencyMatrixBackend<T> {
             if !weight.is_default() {
                 edges.push((i, weight.clone()));
             }
-
         }
 
         edges
@@ -70,7 +72,8 @@ pub struct AdjacencyListBackend<T: EdgeValComparable> {
     data: Vec<Vec<(usize, T)>>,
 }
 
-impl<T: EdgeValComparable> Backend<T, T> for AdjacencyListBackend<T> {
+impl<T: EdgeValComparable> Backend for AdjacencyListBackend<T> {
+    type EdgeVal = T;
     fn new() -> Self {
         Self { data: Vec::new() }
     }
@@ -94,5 +97,4 @@ impl<T: EdgeValComparable> Backend<T, T> for AdjacencyListBackend<T> {
     fn get_edges(&self, node: usize) -> Vec<(usize, T)> {
         self.data[node].clone()
     }
-
 }

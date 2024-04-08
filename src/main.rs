@@ -23,12 +23,12 @@ impl EdgeValComparable for MyInt {
 
 }
 fn main() {
-    let mut graph: Graph<MyInt, backend::AdjacencyListBackend<MyInt>> = Graph::new();
+    let mut graph: Graph<MyInt, MyInt, backend::AdjacencyMatrixBackend<MyInt>> = Graph::new();
     graph.add_node(MyInt(1));
     graph.add_node(MyInt(2));
     graph.add_node(MyInt(3));
     graph.add_edge(0, 1, MyInt(1));
     graph.add_edge(0, 2, MyInt(2));
-    graph.add_edge(0, 3, MyInt(3));
+    graph.add_edge(1, 2, MyInt(3));
     println!("Edges from 0: {:?}", graph.get_edges(0));
 }
